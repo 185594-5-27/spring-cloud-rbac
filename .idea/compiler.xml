@@ -8,11 +8,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="model" />
         <module name="registry-center" />
+        <module name="zinpkin" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="model" target="1.8" />
       <module name="registry-center" target="1.8" />
+      <module name="zinpkin" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
