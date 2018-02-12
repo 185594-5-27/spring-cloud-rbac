@@ -6,6 +6,7 @@
         <option value="$PROJECT_DIR$/model/pom.xml" />
         <option value="$PROJECT_DIR$/registry-center/pom.xml" />
         <option value="$PROJECT_DIR$/zinpkin/pom.xml" />
+        <option value="$PROJECT_DIR$/authentication-center/pom.xml" />
       </list>
     </option>
   </component>

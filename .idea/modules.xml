@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/authentication-center/authentication-center.iml" filepath="$PROJECT_DIR$/authentication-center/authentication-center.iml" />
       <module fileurl="file://$PROJECT_DIR$/model/model.iml" filepath="$PROJECT_DIR$/model/model.iml" />
       <module fileurl="file://$PROJECT_DIR$/registry-center/registry-center.iml" filepath="$PROJECT_DIR$/registry-center/registry-center.iml" />
       <module fileurl="file://$PROJECT_DIR$/zinpkin/zinpkin.iml" filepath="$PROJECT_DIR$/zinpkin/zinpkin.iml" />
