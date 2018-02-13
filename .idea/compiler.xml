@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="authentication-center" />
         <module name="model" />
+        <module name="rbac-produce" />
         <module name="registry-center" />
         <module name="zinpkin" />
       </profile>
@@ -15,6 +16,7 @@
     <bytecodeTargetLevel>
       <module name="authentication-center" target="1.8" />
       <module name="model" target="1.8" />
+      <module name="rbac-produce" target="1.8" />
       <module name="registry-center" target="1.8" />
       <module name="zinpkin" target="1.8" />
     </bytecodeTargetLevel>

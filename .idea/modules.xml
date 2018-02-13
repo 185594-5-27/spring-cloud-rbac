@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/authentication-center/authentication-center.iml" filepath="$PROJECT_DIR$/authentication-center/authentication-center.iml" />
       <module fileurl="file://$PROJECT_DIR$/model/model.iml" filepath="$PROJECT_DIR$/model/model.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rbac-produce/rbac-produce.iml" filepath="$PROJECT_DIR$/rbac-produce/rbac-produce.iml" />
       <module fileurl="file://$PROJECT_DIR$/registry-center/registry-center.iml" filepath="$PROJECT_DIR$/registry-center/registry-center.iml" />
       <module fileurl="file://$PROJECT_DIR$/zinpkin/zinpkin.iml" filepath="$PROJECT_DIR$/zinpkin/zinpkin.iml" />
     </modules>
