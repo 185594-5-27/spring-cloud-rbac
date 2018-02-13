@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.produce.sys.dao.DictDao">
+	<resultMap type="com.base.entity.Dict" id="DictMap">
+		<id property="id" column="id"/>
+		<result property="code" column="code"/>
+		<result property="text" column="text"/>
+		<result property="type" column="type"/>
+		<result property="value" column="value"/>
+		<result property="isLoad" column="is_load"/>
+	</resultMap>
+
+	<!--根据主键ID获取对象-->
+	<select id="getById" parameterType="java.lang.Integer" resultMap="DictMap">
+		SELECT id,code,text,type,value,is_load FROM dict
+		WHERE id=#{id}
+	</select>
+
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.base.entity.Dict" resultMap="DictMap">
+		SELECT id,code,text,type,value,is_load FROM dict 
+		WHERE id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.base.entity.Dict" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO dict(code,text,type,value,is_load)
+		VALUES(#{code},#{text},#{type},#{value},#{isLoad})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.base.entity.Dict">
+		UPDATE dict SET code=#{code},text=#{text},type=#{type},value=#{value},is_load=#{isLoad}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.base.entity.Dict">
+		 DELETE FROM dict WHERE id=#{id}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.base.entity.QueryDict" resultMap="DictMap">
+		SELECT id,code,text,type,value,is_load FROM dict
+		WHERE 1=1
+		<if test="code!=null  and code!=''">
+			AND code like concat(#{code},'%')
+		</if>
+		<if test="text!=null and text!=''">
+			AND text like concat(#{text},'%')
+		</if>
+		<if test="type!=null  and type!=''">
+			AND type like concat(#{type},'%')
+		</if>
+		<if test="value!=null  and value!=''">
+			AND value like concat(#{value},'%')
+		</if>
+		<if test="isLoad!=null  and isLoad!=''">
+		AND is_load=#{isLoad}
+		</if>
+		<if test="sort!= null  and sort!=''">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.base.entity.QueryDict" resultType="int">
+		SELECT count(*) FROM dict
+		WHERE 1=1
+		<if test="code!=null  and code!=''">
+			AND code like concat(#{code},'%')
+		</if>
+		<if test="text!=null and text!=''">
+			AND text like concat(#{text},'%')
+		</if>
+		<if test="type!=null  and type!=''">
+			AND type like concat(#{type},'%')
+		</if>
+		<if test="value!=null  and value!=''">
+			AND value like concat(#{value},'%')
+		</if>
+		<if test="isLoad!=null  and isLoad!=''">
+			AND is_load=#{isLoad}
+		</if>
+		<if test="sort!= null  and sort!=''">
+			order by ${sort} ${order}
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.base.entity.QueryDict" resultMap="DictMap">
+		SELECT id,code,text,type,value,is_load FROM dict
+		WHERE 1=1
+		<if test="code!=null  and code!=''">
+			AND code like concat(#{code},'%')
+		</if>
+		<if test="text!=null and text!=''">
+			AND text like concat(#{text},'%')
+		</if>
+		<if test="type!=null  and type!=''">
+			AND type like concat(#{type},'%')
+		</if>
+		<if test="value!=null  and value!=''">
+			AND value like concat(#{value},'%')
+		</if>
+		<if test="isLoad!=null  and isLoad!=''">
+			AND is_load=#{isLoad}
+		</if>
+		<if test="sort!= null  and sort!=''">
+			order by ${sort} ${order}
+		</if>
+	</select>
+
+	<!-- 加载所有的数据 -->
+	<select id="loadAll" parameterType="com.base.entity.QueryDict" resultMap="DictMap">
+	SELECT id,code,text,type,value,is_load FROM dict
+	</select>
+
+</mapper>
