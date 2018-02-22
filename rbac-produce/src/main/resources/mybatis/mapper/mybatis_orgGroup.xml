@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.produce.sys.dao.OrgGroupDao">
+	<resultMap type="com.base.entity.OrgGroup" id="OrgGroupMap">
+		<id property="groupId" column="group_id"/>
+		<result property="existingNum" column="existing_num"/>
+		<result property="groupCode" column="group_code"/>
+		<result property="name" column="name"/>
+		<result property="node" column="node"/>
+		<result property="num" column="num"/>
+		<result property="parentNode" column="parent_node"/>
+	</resultMap>
+
+	<!-- 根据父节点来查询最大的节点的值 -->
+	<select id="getMaxOrgGroup" parameterType="java.lang.String" resultType="java.lang.String">
+		select max(o.node) from org_group o where o.parent_node = #{parentNode}
+	</select>
+
+	<!-- 根据菜单节点NODE来查询节点数据 -->
+	<select id="findByNode" parameterType="java.lang.String" resultMap="OrgGroupMap">
+			select * from org_group where node = #{node}
+	</select>
+
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.base.entity.OrgGroup" resultMap="OrgGroupMap">
+		SELECT group_id,existing_num,group_code,name,node,num,parent_node FROM org_group 
+		WHERE group_id=#{groupId}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.base.entity.OrgGroup" useGeneratedKeys="true" keyProperty="groupId">
+		INSERT INTO org_group(existing_num,group_code,name,node,num,parent_node)
+		VALUES(#{existingNum},#{groupCode},#{name},#{node},#{num},#{parentNode})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.base.entity.OrgGroup">
+		UPDATE org_group SET group_code=#{groupCode},name=#{name},node=#{node},num=#{num},parent_node=#{parentNode}
+		WHERE group_id=#{groupId}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.base.entity.OrgGroup">
+		 DELETE FROM org_group WHERE group_id=#{groupId}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.base.entity.QueryOrgGroup" resultMap="OrgGroupMap">
+		SELECT group_id,existing_num,group_code,name,node,num,parent_node FROM org_group
+		WHERE 1=1
+		<if test="existingNum!=null and existingNum!='' "  >
+		AND existing_num=#{existingNum}
+		</if>
+		<if test="groupCode!=null and groupCode!='' "  >
+		AND group_code=#{groupCode}
+		</if>
+		<if test="name!=null and name!='' "  >
+		AND name=#{name}
+		</if>
+		<if test="node!=null and node!='' "  >
+		AND node=#{node}
+		</if>
+		<if test="num!=null and num!='' "  >
+		AND num=#{num}
+		</if>
+		<if test="parentNode!=null and parentNode!='' "  >
+		AND parent_node=#{parentNode}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.base.entity.QueryOrgGroup" resultType="int">
+		SELECT count(*) FROM org_group
+		WHERE 1=1
+		<if test="existingNum!=null and existingNum!='' ">
+		AND existing_num=#{existingNum}
+		</if>
+		<if test="groupCode!=null and groupCode!='' ">
+		AND group_code=#{groupCode}
+		</if>
+		<if test="name!=null and name!='' ">
+		AND name=#{name}
+		</if>
+		<if test="node!=null and node!='' ">
+		AND node=#{node}
+		</if>
+		<if test="num!=null and num!='' ">
+		AND num=#{num}
+		</if>
+		<if test="parentNode!=null and parentNode!='' ">
+		AND parent_node=#{parentNode}
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.base.entity.QueryOrgGroup" resultMap="OrgGroupMap">
+		SELECT group_id,existing_num,group_code,name,node,num,parent_node FROM org_group
+		WHERE 1=1
+		<if test="existingNum!=null and existingNum!='' ">
+		AND existing_num=#{existingNum}
+		</if>
+		<if test="groupCode!=null and groupCode!='' ">
+		AND group_code=#{groupCode}
+		</if>
+		<if test="name!=null and name!='' ">
+		AND name=#{name}
+		</if>
+		<if test="node!=null and node!='' ">
+		AND node=#{node}
+		</if>
+		<if test="num!=null and num!='' ">
+		AND num=#{num}
+		</if>
+		<if test="parentNode!=null and parentNode!='' ">
+		AND parent_node=#{parentNode}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>
