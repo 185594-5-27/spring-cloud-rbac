@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.produce.sys.dao.UserRoleDao">
+	<resultMap type="com.base.entity.UserRole" id="UserRoleMap">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="roleName" column="role_name"/>
+	</resultMap>
+
+	<resultMap type="com.base.entity.UserRole" id="UserRoleTreeMap">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="roleName" column="role_name"/>
+		<collection property="treeList"  ofType="com.base.entity.Tree" javaType="java.util.ArrayList">
+			<id property="id" column="tree_id"/>
+			<result property="code" column="code"/>
+			<result property="icon" column="icon"/>
+			<result property="name" column="tree_name"/>
+			<result property="pId" column="p_id"/>
+			<result property="treeOrder" column="tree_order"/>
+			<result property="url" column="url"/>
+			<result property="state" column="state"/>
+		</collection>
+	</resultMap>
+
+
+	<select id="getUserRoleAssociate" parameterType="com.base.entity.UserRole" resultMap="UserRoleTreeMap">
+		SELECT ur.*,t.id as tree_id,t.code,t.icon,t.name as tree_name,t.p_id,t.tree_order,t.url,t.state FROM user_role ur inner join role_associate_tree rat on ur.id = rat.role_id inner join tree t on rat.tree_id = t.id
+		WHERE ur.id=#{id}
+	</select>
+
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.base.entity.UserRole" resultMap="UserRoleTreeMap">
+		SELECT ur.* FROM user_role ur WHERE ur.id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.base.entity.UserRole" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO user_role(name,role_name)
+		VALUES(#{name},#{roleName})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.base.entity.UserRole">
+		UPDATE user_role SET name=#{name},role_name=#{roleName}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.base.entity.UserRole">
+		 DELETE FROM user_role WHERE id=#{id}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.base.entity.QueryUserRole" resultMap="UserRoleMap">
+		SELECT id,name,role_name FROM user_role
+		WHERE 1=1
+		<if test="name!=null and name!='' "  >
+		AND name like concat(#{name},'%')
+		</if>
+		<if test="roleName!=null and roleName!='' "  >
+		AND role_name like concat(#{roleName},'%')
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.base.entity.QueryUserRole" resultType="int">
+		SELECT count(*) FROM user_role
+		WHERE 1=1
+		<if test="name!=null and name!='' "  >
+			AND name like concat(#{name},'%')
+		</if>
+		<if test="roleName!=null and roleName!='' "  >
+			AND role_name like concat(#{roleName},'%')
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.base.entity.QueryUserRole" resultMap="UserRoleMap">
+		SELECT id,name,role_name FROM user_role
+		WHERE 1=1
+		<if test="name!=null and name!='' "  >
+			AND name like concat(#{name},'%')
+		</if>
+		<if test="roleName!=null and roleName!='' "  >
+			AND role_name like concat(#{roleName},'%')
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>
