@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.produce.sys.dao.TreeDao">
+	<resultMap type="com.base.entity.Tree" id="TreeMap">
+		<id property="id" column="id"/>
+		<result property="code" column="code"/>
+		<result property="icon" column="icon"/>
+		<result property="name" column="name"/>
+		<result property="pId" column="p_id"/>
+		<result property="treeOrder" column="tree_order"/>
+		<result property="url" column="url"/>
+		<result property="state" column="state"/>
+	</resultMap>
+
+	<!-- 加载用户的菜单树的数据 -->
+	<select id="loadUserTree" resultMap="TreeMap" parameterType="com.base.entity.User">
+		select DISTINCT t.*  from tree t inner join role_associate_tree rat on t.id = rat.tree_id inner join user_role ur on rat.role_id = ur.id where ur.id in
+		<foreach collection="roles" index="index" item="role" open="(" separator="," close=")">
+			#{role.id}
+		</foreach>
+	</select>
+
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.base.entity.Tree" resultMap="TreeMap">
+		SELECT id,code,icon,name,p_id,tree_order,url,state FROM tree 
+		WHERE id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.base.entity.Tree" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO tree(code,icon,name,p_id,tree_order,url,state)
+		VALUES(#{code},#{icon},#{name},#{pId},#{treeOrder},#{url},#{state})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.base.entity.Tree">
+		UPDATE tree SET code=#{code},icon=#{icon},name=#{name},p_id=#{pId},tree_order=#{treeOrder},url=#{url},state=#{state}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.base.entity.Tree">
+		 DELETE FROM tree WHERE id=#{id}
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.base.entity.QueryTree" resultMap="TreeMap">
+		SELECT id,code,icon,name,p_id,tree_order,url,state FROM tree
+		WHERE 1=1
+		<if test="code!=null and code!='' ">
+		AND code=#{code}
+		</if>
+		<if test="icon!=null and icon!='' ">
+		AND icon=#{icon}
+		</if>
+		<if test="name!=null and name!='' ">
+		AND name=#{name}
+		</if>
+		<if test="pId!=null and pId!='' ">
+		AND p_id=#{pId}
+		</if>
+		<if test="treeOrder!=null and treeOrder!='' ">
+		AND tree_order=#{treeOrder}
+		</if>
+		<if test="url!=null and url!='' ">
+		AND url=#{url}
+		</if>
+		<if test="state!=null and state!='' ">
+		AND state=#{state}
+		</if>
+		<if test="sort!= null and sort!='' ">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.base.entity.QueryTree" resultType="int">
+		SELECT count(*) FROM tree
+		WHERE 1=1
+		<if test="code!=null and code!='' ">
+			AND code=#{code}
+		</if>
+		<if test="icon!=null and icon!='' ">
+			AND icon=#{icon}
+		</if>
+		<if test="name!=null and name!='' ">
+			AND name=#{name}
+		</if>
+		<if test="pId!=null and pId!='' ">
+			AND p_id=#{pId}
+		</if>
+		<if test="treeOrder!=null and treeOrder!='' ">
+			AND tree_order=#{treeOrder}
+		</if>
+		<if test="url!=null and url!='' ">
+			AND url=#{url}
+		</if>
+		<if test="state!=null and state!='' ">
+			AND state=#{state}
+		</if>
+		<if test="sort!= null and sort!='' ">
+			order by ${sort} ${order}
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.base.entity.QueryTree" resultMap="TreeMap">
+		SELECT id,code,icon,name,p_id,tree_order,url,state FROM tree
+		WHERE 1=1
+		<if test="code!=null and code!='' ">
+			AND code=#{code}
+		</if>
+		<if test="icon!=null and icon!='' ">
+			AND icon=#{icon}
+		</if>
+		<if test="name!=null and name!='' ">
+			AND name=#{name}
+		</if>
+		<if test="pId!=null and pId!='' ">
+			AND p_id=#{pId}
+		</if>
+		<if test="treeOrder!=null and treeOrder!='' ">
+			AND tree_order=#{treeOrder}
+		</if>
+		<if test="url!=null and url!='' ">
+			AND url=#{url}
+		</if>
+		<if test="state!=null and state!='' ">
+			AND state=#{state}
+		</if>
+		<if test="sort!= null and sort!='' ">
+			order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>

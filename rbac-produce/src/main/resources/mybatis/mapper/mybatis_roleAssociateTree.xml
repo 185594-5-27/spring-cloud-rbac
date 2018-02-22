@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.produce.sys.dao.RoleAssociateTreeDao">
+	<resultMap type="com.base.entity.RoleAssociateTree" id="RoleAssociateTreeMap">
+		<result property="roleId" column="role_id"/>
+		<result property="treeId" column="tree_id"/>
+	</resultMap>
+
+	<!-- 根据菜单ID来删除关联的菜单数据 -->
+	<delete id="removeTreeByTreeId" parameterType="com.base.entity.Tree">
+		delete from role_associate_tree where tree_id = #{id}
+	</delete>
+
+	<!-- 根据角色ID来删除关联的菜单数据 -->
+	<delete id="removeTreeByRoleId" parameterType="com.base.entity.UserRole">
+		delete from role_associate_tree where role_id = #{id}
+	</delete>
+
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.base.entity.RoleAssociateTree" resultMap="RoleAssociateTreeMap">
+		SELECT role_id,tree_id FROM role_associate_tree 
+		WHERE 
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.base.entity.RoleAssociateTree">
+		INSERT INTO role_associate_tree(role_id,tree_id)
+		VALUES(#{roleId},#{treeId})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.base.entity.RoleAssociateTree">
+		UPDATE role_associate_tree SET role_id=#{roleId},tree_id=#{treeId}
+		WHERE 
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.base.entity.RoleAssociateTree">
+		 DELETE FROM role_associate_tree WHERE 
+	</delete>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.base.entity.QueryRoleAssociateTree" resultMap="RoleAssociateTreeMap">
+		SELECT role_id,tree_id FROM role_associate_tree
+		WHERE 1=1
+		<if test="roleId!=null and roleId!='' "  >
+		AND role_id=#{roleId}
+		</if>
+		<if test="treeId!=null and treeId!='' "  >
+		AND tree_id=#{treeId}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.base.entity.QueryRoleAssociateTree" resultType="int">
+		SELECT count(*) FROM role_associate_tree
+		WHERE 1=1
+		<if test="roleId!=null and roleId!='' ">
+		AND role_id=#{roleId}
+		</if>
+		<if test="treeId!=null and treeId!='' ">
+		AND tree_id=#{treeId}
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.base.entity.QueryRoleAssociateTree" resultMap="RoleAssociateTreeMap">
+		SELECT role_id,tree_id FROM role_associate_tree
+		WHERE 1=1
+		<if test="roleId!=null and roleId!='' ">
+		AND role_id=#{roleId}
+		</if>
+		<if test="treeId!=null and treeId!='' ">
+		AND tree_id=#{treeId}
+		</if>
+		<if test="sort!= null">
+		order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>
