@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.produce.sys.dao.UserDao">
+	<resultMap type="com.base.entity.User" id="UserMap">
+		<id property="id" column="id"/>
+		<result property="login" column="login"/>
+		<result property="password" column="password"/>
+		<result property="userName" column="user_name"/>
+		<result property="address" column="address"/>
+		<result property="job" column="job"/>
+		<result property="groupId" column="group_id"/>
+		<result property="birthDate" column="birth_date"/>
+		<result property="city" column="city"/>
+		<result property="district" column="district"/>
+		<result property="province" column="province"/>
+		<result property="streetAddress" column="street_address"/>
+		<result property="state" column="state"/>
+		<result property="type" column="type"/>
+		<result property="lastLoginDate" column="last_login_date"/>
+		<association property="orgGroup" javaType="com.base.entity.OrgGroup" column="group_id">
+			<id property="groupId" column="group_id"/>
+			<result property="existingNum" column="existing_num"/>
+			<result property="groupCode" column="group_code"/>
+			<result property="name" column="name"/>
+			<result property="node" column="node"/>
+			<result property="num" column="num"/>
+			<result property="parentNode" column="parent_node"/>
+		</association>
+	</resultMap>
+
+	<!-- 包含角色信息的map -->
+	<resultMap type="com.base.entity.User" id="UserLoginMap">
+		<id property="id" column="id"/>
+		<result property="login" column="login"/>
+		<result property="password" column="password"/>
+		<result property="userName" column="user_name"/>
+		<result property="address" column="address"/>
+		<result property="job" column="job"/>
+		<result property="groupId" column="group_id"/>
+		<result property="birthDate" column="birth_date"/>
+		<result property="city" column="city"/>
+		<result property="district" column="district"/>
+		<result property="province" column="province"/>
+		<result property="streetAddress" column="street_address"/>
+		<result property="state" column="state"/>
+		<result property="type" column="type"/>
+		<result property="lastLoginDate" column="last_login_date"/>
+		<collection property="roles"  ofType="com.base.entity.UserRole" javaType="java.util.ArrayList">
+			<result column="user_role_id" property="id" jdbcType="VARCHAR" />
+			<result column="name" property="name" jdbcType="VARCHAR" />
+			<result column="role_name" property="roleName" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+	<!-- 更新用户状态为可用或者不可用 -->
+	<update id="userControl" parameterType="com.base.entity.User">
+		update user set state = #{state} where id=#{id}
+	</update>
+
+	<!-- 根据账号来获取用户信息 -->
+	<select id="findByLogin" parameterType="java.lang.String" resultMap="UserLoginMap">
+		select u.*,ur.id as user_role_id,ur.name,ur.role_name from user u inner join user_associate_role uar on u.id = uar.user_id inner join user_role ur on uar.role_id = ur.id where u.login = #{login}
+	</select>
+
+	<!-- 更新用户的最迟登陆时间 -->
+     <update id="updateLogin" parameterType="com.base.entity.User">
+		 update user set last_login_date = #{lastLoginDate} where id=#{id}
+	 </update>
+
+	<!--根据主键获取对象-->
+	<select id="get" parameterType="com.base.entity.User" resultMap="UserMap">
+		select u.*,og.existing_num,og.group_code,og.name,og.node,og.num,og.parent_node from user u inner join org_group og on u.group_id = og.group_id
+		WHERE id=#{id}
+	</select>
+
+	<!--保存-->
+	<insert id="save" parameterType="com.base.entity.User" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO user(login,password,user_name,address,job,group_id,birth_date,city,district,province,street_address,state,type,last_login_date)
+		VALUES(#{login},#{password},#{userName},#{address},#{job},#{orgGroup.groupId},#{birthDate},#{city},#{district},#{province},#{streetAddress},#{state},#{type},#{lastLoginDate})
+	</insert>
+
+	<!--修改-->
+	<update id="update" parameterType="com.base.entity.User">
+		UPDATE user SET user_name=#{userName},address=#{address},job=#{job},group_id=#{orgGroup.groupId},birth_date=#{birthDate},city=#{city},district=#{district},province=#{province},street_address=#{streetAddress}
+		WHERE id=#{id}
+	</update>
+
+	<!--删除-->
+	<delete id="delete" parameterType="com.base.entity.User">
+		 DELETE FROM user WHERE id=#{id}
+	</delete>
+
+	<!--分页查询组织架构底下的用户-->
+	<select id="findGroupUserByPage" parameterType="com.base.entity.QueryUser" resultMap="UserMap">
+		select u.*,og.existing_num,og.group_code,og.name,og.node,og.num,og.parent_node from user u inner join org_group og on u.group_id = og.group_id
+		WHERE 1=1
+		<if test="userName!=null and userName!='' ">
+			AND u.user_name like concat(#{userName},'%')
+		</if>
+		<if test="orgGroup!=null">
+			<if test="orgGroup.parentNode!=null and orgGroup.parentNode!='' ">
+                  AND og.parent_node like concat(#{orgGroup.parentNode},'%')
+			</if>
+			<if test="orgGroup.node!=null and orgGroup.node!='' ">
+				AND og.node like concat(#{orgGroup.node},'%')
+			</if>
+		</if>
+		<if test="sort!= null and sort!='' ">
+			order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计组织架构底下的用户-->
+	<select id="countGroupUser" parameterType="com.base.entity.QueryUser" resultType="int">
+		select count(1) from user u inner join org_group og on u.group_id = og.group_id
+		WHERE 1=1
+		<if test="userName!=null and userName!='' ">
+			AND u.user_name like concat(#{userName},'%')
+		</if>
+		<if test="orgGroup!=null">
+			<if test="orgGroup.parentNode!=null and orgGroup.parentNode!='' ">
+				AND og.parent_node like concat(#{orgGroup.parentNode},'%')
+			</if>
+			<if test="orgGroup.node!=null and orgGroup.node!='' ">
+				AND og.node like concat(#{orgGroup.node},'%')
+			</if>
+		</if>
+	</select>
+
+	<!--分页查询-->
+	<select id="findByPage" parameterType="com.base.entity.QueryUser" resultMap="UserMap">
+		select u.*,og.existing_num,og.group_code,og.name,og.node,og.num,og.parent_node from user u inner join org_group og on u.group_id = og.group_id
+		WHERE 1=1
+		<if test="login!=null and login!='' ">
+		AND u.login=#{login}
+		</if>
+		<if test="password!=null and password!='' ">
+		AND u.password=#{password}
+		</if>
+		<if test="userName!=null and userName!='' ">
+		AND u.user_name=#{userName}
+		</if>
+		<if test="address!=null and address!='' ">
+		AND u.address=#{address}
+		</if>
+		<if test="job!=null and job!='' ">
+		AND u.job=#{job}
+		</if>
+		<if test="groupId!=null and groupId!='' ">
+		AND u.group_id=#{groupId}
+		</if>
+		<if test="birthDate!=null and birthDate!='' ">
+		AND u.birth_date=#{birthDate}
+		</if>
+		<if test="city!=null and city!='' ">
+		AND u.city=#{city}
+		</if>
+		<if test="district!=null and district!='' ">
+		AND u.district=#{district}
+		</if>
+		<if test="province!=null and province!='' ">
+		AND u.province=#{province}
+		</if>
+		<if test="streetAddress!=null and streetAddress!='' ">
+		AND u.street_address=#{streetAddress}
+		</if>
+		<if test="state!=null and state!='' ">
+		AND u.state=#{state}
+		</if>
+		<if test="type!=null and type!='' ">
+		AND u.type=#{type}
+		</if>
+		<if test="lastLoginDate!=null and lastLoginDate!='' ">
+		AND u.last_login_date=#{lastLoginDate}
+		</if>
+		<if test="sort!= null and sort!='' ">
+		order by ${sort} ${order}
+		</if>
+		limit #{offset},#{limit}
+	</select>
+
+	<!--统计-->
+	<select id="count" parameterType="com.base.entity.QueryUser" resultType="int">
+		SELECT count(*) FROM user
+		WHERE 1=1
+		<if test="login!=null and login!='' ">
+			AND login=#{login}
+		</if>
+		<if test="password!=null and password!='' ">
+			AND password=#{password}
+		</if>
+		<if test="userName!=null and userName!='' ">
+			AND user_name=#{userName}
+		</if>
+		<if test="address!=null and address!='' ">
+			AND address=#{address}
+		</if>
+		<if test="job!=null and job!='' ">
+			AND job=#{job}
+		</if>
+		<if test="groupId!=null and groupId!='' ">
+			AND group_id=#{groupId}
+		</if>
+		<if test="birthDate!=null and birthDate!='' ">
+			AND birth_date=#{birthDate}
+		</if>
+		<if test="city!=null and city!='' ">
+			AND city=#{city}
+		</if>
+		<if test="district!=null and district!='' ">
+			AND district=#{district}
+		</if>
+		<if test="province!=null and province!='' ">
+			AND province=#{province}
+		</if>
+		<if test="streetAddress!=null and streetAddress!='' ">
+			AND street_address=#{streetAddress}
+		</if>
+		<if test="state!=null and state!='' ">
+			AND state=#{state}
+		</if>
+		<if test="type!=null and type!='' ">
+			AND type=#{type}
+		</if>
+		<if test="lastLoginDate!=null and lastLoginDate!='' ">
+			AND last_login_date=#{lastLoginDate}
+		</if>
+		<if test="sort!= null and sort!='' ">
+			order by ${sort} ${order}
+		</if>
+	</select>
+
+	<!--查询-->
+	<select id="query" parameterType="com.base.entity.QueryUser" resultMap="UserMap">
+		SELECT id,login,password,user_name,address,job,group_id,birth_date,city,district,province,street_address,state,type,last_login_date FROM user
+		WHERE 1=1
+		<if test="login!=null and login!='' ">
+			AND login=#{login}
+		</if>
+		<if test="password!=null and password!='' ">
+			AND password=#{password}
+		</if>
+		<if test="userName!=null and userName!='' ">
+			AND user_name=#{userName}
+		</if>
+		<if test="address!=null and address!='' ">
+			AND address=#{address}
+		</if>
+		<if test="job!=null and job!='' ">
+			AND job=#{job}
+		</if>
+		<if test="groupId!=null and groupId!='' ">
+			AND group_id=#{groupId}
+		</if>
+		<if test="birthDate!=null and birthDate!='' ">
+			AND birth_date=#{birthDate}
+		</if>
+		<if test="city!=null and city!='' ">
+			AND city=#{city}
+		</if>
+		<if test="district!=null and district!='' ">
+			AND district=#{district}
+		</if>
+		<if test="province!=null and province!='' ">
+			AND province=#{province}
+		</if>
+		<if test="streetAddress!=null and streetAddress!='' ">
+			AND street_address=#{streetAddress}
+		</if>
+		<if test="state!=null and state!='' ">
+			AND state=#{state}
+		</if>
+		<if test="type!=null and type!='' ">
+			AND type=#{type}
+		</if>
+		<if test="lastLoginDate!=null and lastLoginDate!='' ">
+			AND last_login_date=#{lastLoginDate}
+		</if>
+		<if test="sort!= null and sort!='' ">
+			order by ${sort} ${order}
+		</if>
+	</select>
+</mapper>

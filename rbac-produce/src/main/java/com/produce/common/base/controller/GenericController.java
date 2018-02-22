@@ -55,8 +55,6 @@ public abstract class GenericController<T, Q extends QueryBase> {
 		if(t==null){
 			result.put(SystemStaticConst.RESULT,SystemStaticConst.FAIL);
 			result.put(SystemStaticConst.MSG,"获取数据失败！");
-			result.put("entity",t);
-		}else{
 			result.put(SystemStaticConst.RESULT,SystemStaticConst.SUCCESS);
 			result.put(SystemStaticConst.MSG,"获取数据成功！");
 			result.put("entity",t);
