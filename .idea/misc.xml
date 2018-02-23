@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/zinpkin/pom.xml" />
         <option value="$PROJECT_DIR$/authentication-center/pom.xml" />
         <option value="$PROJECT_DIR$/rbac-produce/pom.xml" />
+        <option value="$PROJECT_DIR$/rbac-consumer/pom.xml" />
       </list>
     </option>
   </component>
