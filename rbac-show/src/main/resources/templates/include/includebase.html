@@ -1,0 +1,47 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
+<link th:href="@{/css/bootstrap-table.css}" rel="stylesheet"/>
+<link th:href="@{/font-awesome/css/font-awesome.min.css}" rel="stylesheet"/>
+<link th:href="@{/css/bootstrap-datetimepicker.css}" rel="stylesheet"/>
+<link th:href="@{/css/bootstrapValidator.min.css}" rel="stylesheet"/>
+<link th:href="@{/css/fileinput.css}" rel="stylesheet"/>
+<link th:href="@{/css/fileinput-rtl.css}" rel="stylesheet"/>
+<link th:href="@{/css/theme.css}" rel="stylesheet"/>
+<link th:href="@{/css/zTreeStyle/metro.css}" rel="stylesheet"/>
+
+
+<script th:src="@{/js/sockjs.min.js}"></script>
+<script th:src="@{/js/stomp.min.js}"></script>
+<script th:src="@{/js/jquery.js}"></script>
+<script th:src="@{/js/distpicker/distpicker.data.js}"></script>
+<script th:src="@{/js/distpicker/distpicker.js}"></script>
+<script th:src="@{/js/websocket/socketUtil.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/bootstrap/nav/nav.js}"></script>
+<script th:src="@{/js/bootstrap/tab/bootstrap-tab.js}"></script>
+<script th:src="@{/js/bootstrap/tree/tree.js}"></script>
+<script th:src="@{/js/bootstrap/alert/alert.js}"></script>
+<script th:src="@{/js/bootstrap/table/bootstrap-table.js}"></script>
+<script th:src="@{/js/bootstrap/date/bootstrap-datetimepicker.js}"></script>
+<script th:src="@{/js/bootstrap/validator/bootstrapValidator.min.js}"></script>
+<script th:src="@{/js/bootstrap/upload/fileinput.min.js}"></script>
+<script th:src="@{/js/bootstrap/upload/plugins/sortable.js}"></script>
+<script th:src="@{/js/bootstrap/upload/locales/zh.js}"></script>
+<script th:src="@{/js/bootstrap/upload/theme.js}"></script>
+<script th:src="@{/js/bootstrap/ztree/jquery.ztree.all-3.5.min.js}"></script>
+<script th:src="@{/js/bootstrap/checkbox/checkbox.js}"></script>
+<script th:src="@{/js/ajaxutil/ajaxUtil.js}"></script>
+<script th:src="@{/js/dict/dictUtil.js}"></script>
+<script th:src="@{/js/bootstrap/date/date.prototype.format.js}"></script>
+<script th:src="@{/js/bootstrap/util/number.pick.util.js}"></script>
+<script th:src="@{/js/ajaxutil/loadInfoData.js}"></script>
+<script th:inline="javascript">
+    var token = [[${session.token }]];
+    var api_url = "http://127.0.0.1:5100/v1/dinner/";
+</script>
+<script th:src="@{/js/ajaxhook/wendu.ajaxhook.min.js}"></script>
+<script th:src="@{/js/ajaxhook/inithook.js}"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+</html>
