@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rbac.rbacshow.sys.dao.UserDao">
+
+	<!-- 包含角色信息的map -->
+	<resultMap type="com.rbac.rbacshow.sys.entity.User" id="UserLoginMap">
+		<id property="id" column="id"/>
+		<result property="login" column="login"/>
+		<result property="password" column="password"/>
+		<result property="userName" column="user_name"/>
+		<result property="address" column="address"/>
+		<result property="job" column="job"/>
+		<result property="groupId" column="group_id"/>
+		<result property="birthDate" column="birth_date"/>
+		<result property="city" column="city"/>
+		<result property="district" column="district"/>
+		<result property="province" column="province"/>
+		<result property="streetAddress" column="street_address"/>
+		<result property="state" column="state"/>
+		<result property="type" column="type"/>
+		<result property="lastLoginDate" column="last_login_date"/>
+		<collection property="roles" ofType="com.base.entity.UserRole" javaType="java.util.ArrayList">
+			<result column="user_role_id" property="id" jdbcType="VARCHAR" />
+			<result column="name" property="name" jdbcType="VARCHAR" />
+			<result column="role_name" property="roleName" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+	<!-- 根据账号来获取用户信息 -->
+	<select id="findByLogin" parameterType="java.lang.String" resultMap="UserLoginMap">
+		select u.*,ur.id as user_role_id,ur.name,ur.role_name from user u inner join user_associate_role uar on u.id = uar.user_id inner join user_role ur on uar.role_id = ur.id where u.login = #{login}
+	</select>
+
+</mapper>
