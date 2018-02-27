@@ -70,7 +70,7 @@ public class AccessFilter extends ZuulFilter {
         response.setHeader("Access-Control-Allow-Origin",request.getHeader("Origin"));
 
         log.info("send {} request to{}", request.getMethod () ,request.getRequestURL().toString()+"--"+ request.getContentType());
-        /*
+
         Object accessToken = request.getParameter("token");
          if(accessToken == null) {
             log.warn("access token is empty");
@@ -93,7 +93,7 @@ public class AccessFilter extends ZuulFilter {
              ctx.set("error.exception",new RuntimeException((String)result.get("msg")));
              throw new RuntimeException((String)result.get("msg"));
          }
-         */
+
         return null;
     }
 }

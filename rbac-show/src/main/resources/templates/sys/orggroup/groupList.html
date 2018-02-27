@@ -1,0 +1,262 @@
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:include="include/includebase"></head>
+<body>
+<div id="content" class="row-fluid">
+    <div class="col-md-3 " style="margin-top: 10px;">
+        <ul id="tree" class="ztree" style="width:560px; overflow:auto;"></ul>
+    </div>
+    <div class="col-md-9">
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading" id="groupQueryTitle">查询条件</div>
+            <div class="panel-body">
+                <form class="form-inline" role="form" style="float: left; width: 100%;" method="post" id="queryGroupUser">
+                    <input type="hidden" id="groupNode" name="orgGroup.node" value="" />
+                    <input type="hidden" id="groupParentNode" name="orgGroup.parentNode" value="" />
+                    <div class="form-group">
+                        <label for="userName">名字:</label>
+                        <input type="text" class="form-control" name="userName" id="userName"  placeholder="请输入名字" />
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <table id="group-user-table" style="margin-top: -50px;">
+        </table>
+    </div>
+</div>
+<script th:inline="javascript">
+    var zTree;
+    var demoIframe;
+    var selectNode;
+
+    // 获取当前窗口的宽度
+    var winWidth = $(window.parent.document).find("#wrapper").width();
+
+    function addHoverDom(treeId, treeNode) {
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+        var addStr = "<span class='button remove' id='removeBtn_" + treeNode.tId + "' title='add node' onfocus='this.blur();'></span>";
+        addStr += "<span class='button add' id='addBtn_" + treeNode.tId + "'></span>";
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "'></span>";
+        sObj.after(addStr);
+        var btn = $("#addBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+            zTree = $.fn.zTree.getZTreeObj("tree");
+            selectNode = treeNode;
+            window.Ewin.dialog({title:"添加",url:"group/addGroupPage?groupId="+treeNode.groupId,gridId:"gridId",width:400,height:460})
+            return false;
+        });
+        var remove_btn = $("#removeBtn_"+treeNode.tId);
+        if (remove_btn) remove_btn.bind("click", function() {
+            zTree = $.fn.zTree.getZTreeObj("tree");
+            if (treeNode.isParent) {
+                window.Ewin.alert({message:"请先删除当前组织架构底下的子组织架构！"});
+            }else{
+                window.Ewin.confirm({title: '提示', message: '是否要删除您当前选中的组织机构？', width: 500}).on(function (e) {
+                    if (e) {
+                        $.post(api_url+"group/remove",{groupId:treeNode.groupId},function(e){
+                            if(e.result){
+                                zTree.removeNode(treeNode);
+                                window.Ewin.alert({message:e.msg});
+                            }else{
+                                window.Ewin.alert({message:e.msg});
+                            }
+                        })
+                    }
+                });
+            }
+            return false;
+        });
+        var edit_btn = $("#editBtn_"+treeNode.tId);
+        if (edit_btn) edit_btn.bind("click", function(){
+            zTree = $.fn.zTree.getZTreeObj("tree");
+            selectNode = treeNode;
+            window.Ewin.dialog({title:"修改",url:"group/updateGroupPage?groupId="+treeNode.groupId,gridId:"gridId",width:400,height:460})
+            return false;
+        });
+    };
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+    };
+
+    var setting = {
+        check: {
+            enable: true
+        },
+        view: {
+            addHoverDom: addHoverDom,
+            removeHoverDom: removeHoverDom,
+            dblClickExpand: true,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "node",
+                pIdKey: "parentNode",
+                rootPId: "0"
+            }
+        },
+        callback: {
+            beforeClick: function(treeId, treeNode) {
+                var zTree = $.fn.zTree.getZTreeObj('tree');
+                $("#groupParentNode").attr("value",treeNode.parentNode);
+                $("#groupNode").attr("value",treeNode.node);
+                $("#groupQueryTitle").html("查询条件（"+treeNode.name+"）")
+                if (treeNode.isParent) {
+                    //zTree.expandNode(treeNode);
+                    doQuery();
+                    return false;
+                } else {
+                    doQuery();
+                    return true;
+                }
+            }
+        }
+    };
+
+    function loadReady() {
+        var bodyH = demoIframe.contents().find("body").get(0).scrollHeight,
+            htmlH = demoIframe.contents().find("html").get(0).scrollHeight,
+            maxH = Math.max(bodyH, htmlH), minH = Math.min(bodyH, htmlH),
+            h = demoIframe.height() >= maxH ? minH:maxH;
+        if (h < 530){
+            h = 530;
+        }
+        demoIframe.height(h);
+    }
+
+    $(function() {
+        $.post(api_url+"group/loadGroupTree",function(info){
+            var t = $("#tree");
+            t = $.fn.zTree.init(t, setting,info.data);
+            $("#groupParentNode").attr("value",$.fn.zTree.getZTreeObj('tree').getNodes()[0].parentNode);
+            $("#groupNode").attr("value",$.fn.zTree.getZTreeObj('tree').getNodes()[0].node);
+            $("#groupQueryTitle").html("查询条件（"+$.fn.zTree.getZTreeObj('tree').getNodes()[0].name+"）")
+            initTable();
+            $('#group-user-table').bootstrapTable('hideColumn', 'id');
+        })
+    });
+
+    function doQuery(){
+        // 移除遮罩层的属性否则会导致在移动端无法显示滚动条
+        $('body').removeClass("modal-open");
+        $('#group-user-table').bootstrapTable('refresh');    //刷新表格
+    }
+
+    function initTable(){
+        $('#group-user-table').bootstrapTable({
+            url:api_url+"group/userList",
+            height:  winWidth<=415?621:$(window.parent.document).find("#wrapper").height() - 252,
+            width:$(window).width(),
+            showColumns:true,
+            formId :"queryGroupUser",
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageSize : winWidth<=415?3:13,
+            cardView : winWidth<=415?true:false,// 根据屏幕大小来决定是否试图展示
+            toolbars:[
+                {
+                    text: '添加',
+                    iconCls: 'glyphicon glyphicon-plus',
+                    handler: function () {
+                        window.Ewin.dialog({title:"添加",url:"group/addUserPage",gridId:"gridId",width:winWidth<=415?winWidth-20:600,height:winWidth<=415?745:770})
+                    }
+                },
+                {
+                    text: '修改',
+                    iconCls: 'glyphicon glyphicon-pencil',
+                    handler: function () {
+                        var rows = $('#group-user-table').bootstrapTable('getSelections');
+                        if(rows.length==0||rows.length>1){
+                            window.Ewin.alert({message:'请选择一条需要修改的数据!'});
+                            return false;
+                        }
+                        window.Ewin.dialog({title:"修改",url:"group/updateUserPage?id="+rows[0].id,gridId:"gridId",width:winWidth<=415?winWidth-20:600,height:590});
+                    }
+                },
+                {
+                    text: '删除',
+                    iconCls: 'glyphicon glyphicon-remove',
+                    handler: function () {
+                        var rows = $('#group-user-table').bootstrapTable('getSelections');
+                        if(rows.length==0){
+                            window.Ewin.alert({message:'请选择一条需要删除的数据!'});
+                            return false;
+                        }
+                        window.Ewin.confirm({title:'提示',message:'是否要删除您所选择的记录？',width:500}).on(function (e) {
+                            if (e) {
+                                $.post(api_url+"user/removeBath",{json:JSON.stringify(rows)},function(e){
+                                    if(e.result){
+                                        window.Ewin.alert({message:e.msg});
+                                        doQuery();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            ],
+            columns: [
+                {
+                    checkbox: true
+                },
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'id',
+                    title : '用户流水',
+                    align : 'center',
+                    valign : 'middle',
+                    hide : false,
+                    sortable : true
+                },
+                {
+                    field : 'userName',
+                    title : '用户姓名',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                },
+                {
+                    field : 'job',
+                    title : '职位名称',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                },
+                {
+                    field : 'address',
+                    title : '用户地址',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                },
+                {
+                    field : 'orgGroup.name',
+                    title : '组织架构',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                }]
+        });
+    }
+
+
+</script>
+</body>
+</html>

@@ -6,19 +6,24 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="api-gateway" />
         <module name="authentication-center" />
         <module name="model" />
         <module name="rbac-consumer" />
         <module name="rbac-produce" />
+        <module name="rbac-show" />
         <module name="registry-center" />
         <module name="zinpkin" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="api-gateway" target="1.8" />
       <module name="authentication-center" target="1.8" />
       <module name="model" target="1.8" />
+      <module name="rbac" target="1.8" />
       <module name="rbac-consumer" target="1.8" />
       <module name="rbac-produce" target="1.8" />
+      <module name="rbac-show" target="1.8" />
       <module name="registry-center" target="1.8" />
       <module name="zinpkin" target="1.8" />
     </bytecodeTargetLevel>

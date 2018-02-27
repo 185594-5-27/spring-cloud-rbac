@@ -1,0 +1,131 @@
+<html xmlns:th="http://www.thymeleaf.org"
+>
+<head th:include="include/includebase"></head>
+<body>
+<div id="content" class="row-fluid">
+    <div class="col-md-3 " style="margin-top: 10px;">
+        <ul id="menu_tree" class="ztree" style="width:560px; overflow:auto;"></ul>
+    </div>
+</div>
+<script th:inline="javascript">
+    var zTree;
+    var demoIframe;
+    var selectNode;
+
+    // 获取当前窗口的宽度
+    var winWidth = $(window.parent.document).find("#wrapper").width();
+
+    function addHoverDom(treeId, treeNode) {
+        var sObj = $("#" + treeNode.tId + "_span");
+        if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+        var addStr = "<span class='button remove' id='removeBtn_" + treeNode.tId + "' title='add node' onfocus='this.blur();'></span>";
+        addStr += "<span class='button add' id='addBtn_" + treeNode.tId + "'></span>";
+        addStr += "<span class='button edit' id='editBtn_" + treeNode.tId + "'></span>";
+        if(treeNode.isParent){
+            addStr += "<span class='button add' id='addParentBtn_" + treeNode.tId + "'></span>";
+        }
+        sObj.after(addStr);
+        var btn = $("#addBtn_"+treeNode.tId);
+        if (btn) btn.bind("click", function(){
+            zTree = $.fn.zTree.getZTreeObj("menu_tree");
+            selectNode = treeNode;
+            window.Ewin.dialog({title:"添加",url:"tree/addTreePage?id="+treeNode.id,width:winWidth<=415?winWidth-20:400,height:650})
+            return false;
+        });
+        var remove_btn = $("#removeBtn_"+treeNode.tId);
+        if (remove_btn) remove_btn.bind("click", function() {
+            zTree = $.fn.zTree.getZTreeObj("menu_tree");
+            if (treeNode.isParent) {
+                window.Ewin.alert({message:"请先删除当前菜单节点底下的子菜单！"});
+            }else{
+                window.Ewin.confirm({title: '提示', message: '是否要删除您当前选中的菜单节点？', width: 500}).on(function (e) {
+                    if (e) {
+                        $.post(api_url+"tree/remove",{id:treeNode.id},function(e){
+                            if(e.result){
+                                zTree.removeNode(treeNode);
+                                window.Ewin.alert({message:e.msg});
+                            }else{
+                                window.Ewin.alert({message:e.msg});
+                            }
+                        })
+                    }
+                });
+            }
+            return false;
+        });
+        var edit_btn = $("#editBtn_"+treeNode.tId);
+        if (edit_btn) edit_btn.bind("click", function(){
+            zTree = $.fn.zTree.getZTreeObj("menu_tree");
+            selectNode = treeNode;
+            window.Ewin.dialog({title:"修改",url:"tree/updateTreePage?id="+treeNode.id,width:winWidth<=415?winWidth-20:400,height:650})
+            return false;
+        });
+        var add_parent_btn = $("#addParentBtn_"+treeNode.tId);
+        if (add_parent_btn) add_parent_btn.bind("click", function(){
+            zTree = $.fn.zTree.getZTreeObj("menu_tree");
+            selectNode = null;
+            window.Ewin.dialog({title:"添加",url:"tree/addTreePage",width:winWidth<=415?winWidth-20:400,height:650})
+            return false;
+        })
+    };
+
+    function removeHoverDom(treeId, treeNode) {
+        $("#addBtn_"+treeNode.tId).unbind().remove();
+        $("#removeBtn_"+treeNode.tId).unbind().remove();
+        $("#editBtn_"+treeNode.tId).unbind().remove();
+        $("#addParentBtn_"+treeNode.tId).unbind().remove();
+    };
+
+    var setting = {
+        check: {
+            enable: false
+        },
+        view: {
+            addHoverDom: addHoverDom,
+            removeHoverDom: removeHoverDom,
+            dblClickExpand: false,
+            showLine: true,
+            selectedMulti: false
+        },
+        data: {
+            simpleData: {
+                enable:true,
+                idKey: "id",
+                pIdKey: "pId",
+                rootPId: "0"
+            }
+        },
+        callback: {
+            beforeClick: function(treeId, treeNode) {
+                var zTree = $.fn.zTree.getZTreeObj('menu_tree');
+                if (treeNode.isParent) {
+                    //zTree.expandNode(treeNode);
+                    return false;
+                } else {
+                    return false;
+                }
+            }
+        }
+    };
+
+    function loadReady() {
+        var bodyH = demoIframe.contents().find("body").get(0).scrollHeight,
+            htmlH = demoIframe.contents().find("html").get(0).scrollHeight,
+            maxH = Math.max(bodyH, htmlH), minH = Math.min(bodyH, htmlH),
+            h = demoIframe.height() >= maxH ? minH:maxH;
+        if (h < 530){
+            h = 530;
+        }
+        demoIframe.height(h);
+    }
+
+    $(function() {
+        $.post(api_url+"tree/loadUserTree",function(info){
+            var t = $("#menu_tree");
+            t = $.fn.zTree.init(t, setting,info.data);
+        })
+    });
+
+</script>
+</body>
+</html>

@@ -9,6 +9,8 @@
         <option value="$PROJECT_DIR$/authentication-center/pom.xml" />
         <option value="$PROJECT_DIR$/rbac-produce/pom.xml" />
         <option value="$PROJECT_DIR$/rbac-consumer/pom.xml" />
+        <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/rbac-show/pom.xml" />
       </list>
     </option>
   </component>

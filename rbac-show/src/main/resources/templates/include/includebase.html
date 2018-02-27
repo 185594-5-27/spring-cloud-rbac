@@ -36,8 +36,10 @@
 <script th:src="@{/js/bootstrap/util/number.pick.util.js}"></script>
 <script th:src="@{/js/ajaxutil/loadInfoData.js}"></script>
 <script th:inline="javascript">
+    //  用户登陆成功以后获取token
     var token = [[${session.token }]];
-    var api_url = "http://127.0.0.1:5100/v1/dinner/";
+    //  访问我们路由的地址，大家可以将此块的内容配置到数据字典中，这里为了方便就直接写死
+    var api_url = "http://127.0.0.1:5100/v1/rbac/";
 </script>
 <script th:src="@{/js/ajaxhook/wendu.ajaxhook.min.js}"></script>
 <script th:src="@{/js/ajaxhook/inithook.js}"></script>

@@ -1,0 +1,183 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:include="include/includebase"></head>
+<body>
+<div class="panel-body" style="padding-bottom:0px;">
+    <div class="panel panel-default">
+        <div class="panel-heading">查询条件</div>
+        <div class="panel-body">
+            <form class="form-inline" role="form" style="float: left; width: 100%;" method="post" id="queryDict">
+                <div class="form-group">
+                    <label for="type">字典类型:</label>
+                    <input type="text" class="form-control" name="type" id="type"  placeholder="请输入字典类型" />
+                </div>
+                <div class="form-group">
+                    <label for="code">字典编码:</label>
+                    <input type="text" class="form-control" name="code" id="code"  placeholder="请输入字典编码" />
+                </div>
+                <div class="form-group">
+                    <label for="value">字典值:</label>
+                    <input type="text" class="form-control" name="value" id="value"  placeholder="请输入字典值" />
+                </div>
+                <div class="form-group">
+                    <label for="text">字典描述:</label>
+                    <input type="text" class="form-control" name="text" id="text"  placeholder="请输入字典值" />
+                </div>
+                <div class="form-group">
+                    <button type="button" id="queryBtn" onclick="doQuery();" class="btn btn-primary">查询</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <table id="dict-table" style="margin-top: -50px;">
+    </table>
+</div>
+<script th:inline="javascript">
+
+    // 获取当前窗口的宽度
+    var winWidth = $(window.parent.document).find("#wrapper").width();
+
+
+    $(function() {
+        initTable();
+        $('#dict-table').bootstrapTable('hideColumn', 'id');
+    });
+
+    function doQuery(){
+        // 移除遮罩层的属性否则会导致在移动端无法显示滚动条
+        $('body').removeClass("modal-open");
+        $('#dict-table').bootstrapTable('refresh');    //刷新表格
+    }
+
+    function initTable(){
+        $('#dict-table').bootstrapTable({
+            url:api_url+"dict/list",
+            height:  winWidth<=415?721:$(window.parent.document).find("#wrapper").height() - 252,
+            width:$(window).width(),
+            showColumns:true,
+            formId :"queryDict",
+            pagination : true,
+            sortName : 'id',
+            sortOrder : 'desc',
+            clickToSelect: true,// 单击某一行的时候选中某一条记录
+            pageSize : winWidth<=415?3:13,
+            cardView : winWidth<=415?true:false,// 根据屏幕大小来决定是否试图展示
+            toolbars:[
+                {
+                    text: '添加',
+                    iconCls: 'glyphicon glyphicon-plus',
+                    handler: function () {
+                         window.Ewin.dialog({title:"添加",url:"dict/addPage",gridId:"gridId",width:winWidth<=415?winWidth-20:400,height:500})
+                    }
+                },
+                {
+                    text: '修改',
+                    iconCls: 'glyphicon glyphicon-pencil',
+                    handler: function () {
+                        var rows = $('#dict-table').bootstrapTable('getSelections');
+                        if(rows.length==0||rows.length>1){
+                            window.Ewin.alert({message:'请选择一条需要修改的数据!'});
+                            return false;
+                        }
+                        window.Ewin.dialog({title:"修改",url:"dict/updatePage?id="+rows[0].id,gridId:"gridId",width:winWidth<=415?winWidth-20:400,height:500});
+                    }
+                },
+                {
+                    text: '删除',
+                    iconCls: 'glyphicon glyphicon-remove',
+                    handler: function () {
+                        var rows = $('#dict-table').bootstrapTable('getSelections');
+                        if(rows.length==0){
+                            window.Ewin.alert({message:'请选择一条需要删除的数据!'});
+                            return false;
+                        }
+                        window.Ewin.confirm({title:'提示',message:'是否要删除您所选择的记录？',width:500}).on(function (e) {
+                            if (e) {
+                                $.post(api_url+"dict/removeBath",{json:JSON.stringify(rows)},function(e){
+                                   if(e.result){
+                                       window.Ewin.alert({message:e.msg});
+                                       doQuery();
+                                   }
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    text: '重新加载',
+                    iconCls: 'glyphicon glyphicon-record',
+                    handler: function () {
+                        window.Ewin.confirm({title:'提示',message:'是否要需要重新加载数据字典的数据？',width:500}).on(function (e) {
+                            if (e) {
+                                $.post("dict/reload",function(e){
+                                    if(e.result){
+                                        window.Ewin.alert({message:e.msg});
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            ],
+            columns: [
+                {
+                    checkbox: true
+                },
+                {
+                    field: '',
+                    title: '序号',
+                    formatter: function (value, row, index) {
+                        return index+1;
+                    }
+                },
+                {
+                    field : 'id',
+                    title : '字典流水',
+                    align : 'center',
+                    valign : 'middle',
+                    hide : false,
+                    sortable : true
+                },
+                {
+                    field : 'type',
+                    title : '字典类型',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                },
+                {
+                    field : 'code',
+                    title : '字典编码',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                },
+                {
+                    field : 'value',
+                    title : '字典值',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                },
+                {
+                    field : 'text',
+                    title : '字典描述',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true
+                },
+                {
+                    field : 'isLoad',
+                    title : '前端加载',
+                    align : 'center',
+                    valign : 'middle',
+                    sortable : true,
+                    formatter: function (value, row, index) {
+                        return getCodeDictText("DICT_IS_LOAD",value);
+                    }
+                }]
+        });
+    }
+</script>
+</body>
+</html>

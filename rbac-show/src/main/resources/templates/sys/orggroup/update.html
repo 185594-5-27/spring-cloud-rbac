@@ -1,0 +1,113 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<body>
+<form id="groupForm"  role="form" method="post" action="group/update">
+    <input type="hidden" name="groupId"  />
+    <input type="hidden" name="orgGroup.node" id="groupParentNode"  />
+    <div class="form-group" >
+        <label >父部门名称:</label>
+        <input type="text" class="form-control" id="groupParentName"readonly="readonly"  />
+    </div>
+    <div class="form-group">
+        <label for="name">部门名称:</label>
+        <input type="text" class="form-control" name="name" id="name"   placeholder="请输入部门名称" />
+    </div>
+    <div class="form-group" >
+        <label for="groupCode">部门编号:</label>
+        <input type="text" class="form-control" name="groupCode" id="groupCode"  placeholder="请输入部门编号" />
+    </div>
+    <div class="form-group" >
+        <label for="num">部门编制:</label>
+        <input type="text" class="form-control" name="num" id="num"   placeholder="请输入部门编制" />
+    </div>
+</form>
+<script th:inline="javascript">
+    <![CDATA[
+    $(function () {
+
+        $.post(api_url+"group/get",{groupId:[[${entity.groupId}]]},function(r){
+            var obj = r.entity;
+            if(obj.orgGroup=='null'||obj.orgGroup==null){
+                $("#groupParentNode").attr("value","无");
+                $("#groupParentName").attr("value","无");
+            }else{
+                $("#groupParentNode").attr("value",obj.orgGroup.node);
+                $("#groupParentName").attr("value",obj.orgGroup.name);
+            }
+
+            $.fn.loadForm(obj);
+        });
+
+
+        $('#groupForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                name: {
+                    message: '部门名称验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '部门名称不能为空'
+                        }
+                    }
+                },
+                groupCode: {
+                    message: '部门编号验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '部门编号不能为空'
+                        }
+                    }
+                },
+                value: {
+                    message: '部门编制验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '部门编制不能为空'
+                        },
+                        regexp: {
+                            regexp: /^\d{1,9}$ /,
+                            message: '部门编制必须为数字'
+                        },
+                        stringLength: {
+                            min: 1,
+                            max: 18,
+                            message: '用部门编制必须在1到18位之间'
+                        }
+
+                    }
+                }
+            }
+        })
+
+        // 绑定dialog的确定按钮的监听事件
+        $("#btnOk",window.top.document).click(function() {
+            var bootstrapValidator = $("#groupForm", window.top.document).data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                var zTree = $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.zTree;
+                var selectNode = $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.selectNode;
+                $.post(api_url+$("#groupForm",window.top.document).attr('action'),$("#groupForm",window.top.document).serialize(),function(e){
+                    if(e.result){
+                        $('.modal-dialog', window.top.document).parent('div').remove()
+                        $('body', window.top.document).find('.modal-backdrop').remove();
+                        var entity = e.entity;
+                        // 更新菜单节点的信息
+                        selectNode.name = entity.name;
+                        zTree.updateNode(selectNode);
+                        window.Ewin.alert({message:'修改数据成功!'});
+                    }else{
+                        window.Ewin.alert({message:'修改数据失败!'});
+                    }
+                })
+            }
+        });
+    })
+    ]]>
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<body>
+<form id="userForm"  role="form" method="post" action="user/save">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group" >
+                <label for="userName">名字:</label>
+                <input type="text" class="form-control" name="userName" id="userName"  placeholder="请输入名字" />
+            </div>
+            <div class="form-group">
+                <label for="login">账号:</label>
+                <input type="text" class="form-control" name="login" id="login"  placeholder="请输入账号" />
+            </div>
+            <div class="form-group" >
+                <label for="password">密码:</label>
+                <input type="password" class="form-control" name="password" id="password"  placeholder="请输入密码" />
+            </div>
+            <div class="form-group" >
+                <label for="repassword">核对密码:</label>
+                <input type="password" class="form-control" name="repassword" id="repassword"  placeholder="请输入密码" />
+            </div>
+            <div id="distpicker" class="form-inline">
+                <label for="province">省:</label>
+                <select name="province" id="province" class="form-control"></select>
+                <label for="city">市:</label>
+                <select name="city" id="city" class="form-control"></select>
+                <label for="district">区:</label>
+                <select name="district" id="district" class="form-control"></select>
+            </div>
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="streetAddress">街道地址:</label>
+                <input type="text" class="form-control" name="streetAddress" id="streetAddress"  placeholder="请输入街道地址" />
+            </div>
+            <div class="form-group">
+                <label for="job">职位:</label>
+                <input type="text" class="form-control" name="job" id="job"   placeholder="请输入职位" />
+            </div>
+            <div class="form-inline">
+                <label for="groupName">所属部门:</label>
+                <input type="hidden" name="orgGroup.groupId" id="groupId" />
+                <input type="text" class="form-control" name="groupName" id="groupName"  readonly="readonly"  placeholder="请选择所属部门" />
+                <div class="col-md-12" style="margin-top: 10px;">
+                    <ul id="groupZtree" class="ztree" style="width:200px; overflow:auto;"></ul>
+                </div>
+            </div>
+            <div class="form-inline" style="margin-top: 20px;" id="roleList">
+                <label>所属权限:</label>
+            </div>
+        </div>
+
+    </div>
+</form>
+<script th:inline="javascript">
+    <![CDATA[
+    $(function () {
+        $('#userForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                userName: {
+                    message: '名字验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '名字不能为空'
+                        } ,
+                        stringLength: {
+                            min: 2,
+                            max: 30,
+                            message: '名字长度必须在2到30之间'
+                        }
+                    }
+                },
+                login: {
+                    message: '账号验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '账号不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '账号长度必须在6到30之间'
+                        },
+                        threshold :  6 , //有6字符以上才发送ajax请求，（input中输入一个字符，插件会向服务器发送一次，设置限制，6字符以上才开始）
+                        remote: {//ajax验证。server result:{"valid",true or false} 向服务发送当前input name值，获得一个json数据。例表示正确：{"valid",true}
+                            url: api_url+ "user/isExist",//验证地址
+                            data:function(validator) {// 获取需要传送到后台的验证的数据
+                                return {
+                                    login:$('#login').val()
+                                }
+                            },
+                            message: '账号已存在',//提示消息
+                            delay :  500,//每输入一个字符，就发ajax请求，服务器压力还是太大，设置2秒发送一次ajax（默认输入一个字符，提交一次，服务器压力太大）
+                            type: 'POST'//请求方式
+                        }
+                    }
+                },
+                password: {
+                    message:'密码无效',
+                    validators: {
+                        notEmpty: {
+                            message: '密码不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '用户名长度必须在6到30之间'
+                        },
+                        identical: {//相同
+                            field: 'password', //需要进行比较的input name值
+                            message: '两次密码不一致'
+                        },
+                        different: {//不能和用户名相同
+                            field: 'login',//需要进行比较的input name值
+                            message: '不能和用户名相同'
+                        },
+                        regexp: {
+                            regexp: /^[a-zA-Z0-9_\.]+$/,
+                            message: '密码必须是数字字母和下划线不能有特殊符号！'
+                        }
+                    }
+                },
+                repassword: {
+                    message: '密码无效',
+                    validators: {
+                        notEmpty: {
+                            message: '密码不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '用户名长度必须在6到30之间'
+                        },
+                        identical: {//相同
+                            field: 'password',
+                            message: '两次密码不一致'
+                        },
+                        different: {//不能和用户名相同
+                            field: 'login',
+                            message: '不能和用户名相同'
+                        },
+                        regexp: {//匹配规则
+                            regexp: /^[a-zA-Z0-9_\.]+$/,
+                            message: '密码必须是数字字母和下划线不能有特殊符号！'
+                        }
+                    }
+                },
+                streetAddress:{
+                    message: '街道地址无效',
+                    validators: {
+                        notEmpty: {
+                            message: '街道地址不能为空'
+                        },
+                        stringLength: {
+                            min: 6,
+                            max: 30,
+                            message: '街道地址长度必须在6到30之间'
+                        }
+                    }
+                },
+                job : {
+                    message: '职位无效',
+                    validators: {
+                        notEmpty: {
+                            message: '职位不能为空'
+                        },
+                        stringLength: {
+                            min: 3,
+                            max: 30,
+                            message: '职位长度必须在3到30之间'
+                        }
+                    }
+                },
+                groupName:{
+                    message: '部门无效',
+                    validators: {
+                        notEmpty: {
+                            message: '部门不能为空'
+                        }
+                    }
+                }
+            }
+        })
+
+        $("#pickGroup").click(function(){
+            var pickGroup = $("#pickGroup").html();
+            if(pickGroup=='显示'){
+                // 设置dialog的宽度
+                $(".modal-content",window.top.document).css("width","900px");
+                // 设置form表单的宽度比
+                $(".row").find("div").eq(0).attr("class", "col-md-9")
+                // 显示组织架构菜单数
+                $("#groupZtree").parent("div").show();
+                // 将按钮改为隐藏
+                $("#pickGroup").html("隐藏");
+            }else{
+                // 设置dialog的宽度
+                $(".modal-content",window.top.document).css("width","600px");
+                // 设置form表单的宽度比
+                $(".row").find("div").eq(0).attr("class", "col-md-12")
+                // 显示组织架构菜单数
+                $("#groupZtree").parent("div").hide();
+                // 将按钮改为显示
+                $("#pickGroup").html("显示");
+            }
+        })
+
+        // 绑定dialog的确定按钮的监听事件
+        $("#btnOk",window.top.document).click(function() {
+            // 此段是为防止需要点击两次按钮来实现验证的方法，若不添加此处的放行，那么我们将要点击两次确定按钮才可以提交验证
+            var login = $("#login").val();
+            // 判断当前的code又值，且当前不存在错误验证方可放开该字段的验证
+            if(login != null && login != ""&&$("#login").parent("div").find('.glyphicon-remove').length==0){
+                $('#userForm').bootstrapValidator('enableFieldValidators', 'login', false);
+            } else {
+                $('#userForm').bootstrapValidator('enableFieldValidators', 'login', true);
+            }
+            var bootstrapValidator = $("#userForm", window.top.document).data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                $.post(api_url+ $("#userForm",window.top.document).attr('action'),$("#userForm",window.top.document).serialize(),function(e){
+                    if(e.result){
+                        $('.modal-dialog', window.top.document).parent('div').remove()
+                        $('body', window.top.document).find('.modal-backdrop').remove();
+                        // jquery 调用刷新当前操作的table页面的refresh方法
+                        $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.doQuery();
+                        window.Ewin.alert({message:'增加数据成功!'});
+                    }else{
+                        window.Ewin.alert({message:'增加数据失败!'});
+                    }
+                })
+            }
+        });
+
+        // 加载bootstrap的省市区的下拉菜单
+        $("#distpicker").distpicker({
+            province: "福建省",
+            city: "福州市",
+            district: "晋安区"
+        });
+
+        $.fn.checkbox({
+            url:api_url+ "user/loadRoles",
+            id:"roleList",
+            val:"id",
+            showVal:"roleName",
+            name:"roleArray"
+        });
+
+        var setting = {
+            check: {
+                enable: false
+            },
+            view: {
+                dblClickExpand: false,
+                showLine: true,
+                selectedMulti: false
+            },
+            data: {
+                simpleData: {
+                    enable:true,
+                    idKey: "node",
+                    pIdKey: "parentNode",
+                    rootPId: "0"
+                }
+            },
+            callback: {
+                beforeClick: function(treeId, treeNode) {
+                    var zTree = $.fn.zTree.getZTreeObj('groupZtree');
+                    $("#groupName").attr("value",treeNode.name);
+                    $("#groupId").attr("value",treeNode.groupId);
+                    if (treeNode.isParent) {
+                        zTree.expandNode(treeNode);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        };
+
+        $.post(api_url+ "/group/loadGroupTree",function(info){
+            var t = $("#groupZtree");
+            t = $.fn.zTree.init(t, setting,info.data);
+        })
+    })
+    ]]>
+</script>
+</body>
+</html>

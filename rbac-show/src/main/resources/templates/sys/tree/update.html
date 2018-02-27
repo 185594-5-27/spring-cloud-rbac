@@ -1,0 +1,130 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<body>
+<form id="treeForm"  role="form" method="post" action="tree/update">
+    <input type="hidden" name="pId" id="pId"  />
+    <input type="hidden" name="id"  />
+    <div class="form-group" >
+        <label >父菜单名称:</label>
+        <input type="text" class="form-control" id="treeParentName"   readonly="readonly"  />
+    </div>
+    <div class="form-group">
+        <label for="name">菜单名称:</label>
+        <input type="text" class="form-control" name="name" id="name"   placeholder="请输入菜单名称" />
+    </div>
+    <div class="form-group">
+        <label for="url">菜单地址:</label>
+        <input type="text" class="form-control" name="url" id="url"  placeholder="请输入菜单地址" />
+    </div>
+    <div class="form-group">
+        <label for="icon">菜单样式:</label>
+        <input type="text" class="form-control" name="icon" id="icon"   placeholder="请输入菜单样式" />
+    </div>
+    <div class="form-group">
+        <label for="url">菜单编码:</label>
+        <input type="text" class="form-control" name="code" id="code"   placeholder="请输入菜单编码" />
+    </div>
+    <div class="form-group">
+        <label for="treeOrder">菜单顺序:</label>
+        <input type="text" class="form-control" name="treeOrder" id="treeOrder"  placeholder="请输入菜单顺序" />
+    </div>
+    <div class="form-group">
+        <label for="treeOrder">菜单状态:</label>
+        <label  class='radio-inline'><input type='radio' name='state' value='1'    />可用</label>
+        <label  class='radio-inline'><input type='radio' name='state' value='0'    />禁用</label>
+    </div>
+</form>
+<script th:inline="javascript">
+    <![CDATA[
+    $(function () {
+
+        $.post(api_url+"tree/get",{id:[[${entity.id}]]},function(r){
+            var obj = r.entity;
+            if(obj.tree=='null'||obj.tree==null){
+                $("#pId").attr("value",0);
+                $("#treeParentName").attr("value","顶层节点");
+            }else{
+                $("#pId").attr("value",obj.tree.id);
+                $("#treeParentName").attr("value",obj.tree.name);
+            }
+            $.fn.loadForm(obj);
+        });
+
+        $('#treeForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                name: {
+                    message: '菜单名称验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '菜单名称不能为空'
+                        }
+                    }
+                },
+                url: {
+                    message: '菜单地址验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '菜单地址不能为空'
+                        }
+                    }
+                },
+                code: {
+                    message: '菜单编码验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '菜单编码不能为空'
+                        }
+                    }
+                },
+                treeOrder: {
+                    message: '菜单顺序验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '菜单顺序不能为空'
+                        },
+                        regexp: {
+                            regexp: /^[0-9_]+$/,
+                            message: '菜单顺序必须为数字'
+                        },
+                        stringLength: {
+                            min: 1,
+                            max: 18,
+                            message: '菜单顺序必须在1到18位之间'
+                        }
+                    }
+                }
+            }
+        })
+
+        // 绑定dialog的确定按钮的监听事件
+        $("#btnOk",window.top.document).click(function() {
+            var bootstrapValidator = $("#treeForm", window.top.document).data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                var zTree = $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.zTree;
+                var selectNode = $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.selectNode;
+                $.post(api_url+$("#treeForm",window.top.document).attr('action'),$("#treeForm",window.top.document).serialize(),function(e){
+                    if(e.result){
+                        $('.modal-dialog', window.top.document).parent('div').remove()
+                        $('body', window.top.document).find('.modal-backdrop').remove();
+                        var entity = e.entity;
+                        selectNode.name = entity.name;
+                        zTree.updateNode(selectNode);
+                        window.Ewin.alert({message:'修改数据成功!'});
+                    }else{
+                        window.Ewin.alert({message:'修改数据失败!'});
+                    }
+                })
+            }
+        });
+    })
+    ]]>
+</script>
+</body>
+</html>

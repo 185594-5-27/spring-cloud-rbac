@@ -1,0 +1,144 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<body>
+<form id="roleForm"  role="form" method="post" action="role/save">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group" >
+                <label for="name">权限代码:</label>
+                <input type="text" class="form-control" name="name" id="name"  placeholder="请输入权限代码" />
+            </div>
+            <div class="form-group" >
+                <label for="roleName">权限名称:</label>
+                <input type="text" class="form-control" name="roleName" id="roleName"  placeholder="请输入权限名称" />
+            </div>
+            <div class="form-group" >
+                <label for="roleName">菜单权限:</label>
+                <div class="col-md-12" style="margin-top: 10px;">
+                    <input type="hidden" id="treeArray" name="treeArray" />
+                    <ul id="roleZtree" class="ztree" style="width:200px; overflow:auto;"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script th:inline="javascript">
+    <![CDATA[
+    $(function () {
+        $('#roleForm').bootstrapValidator({
+            message: 'This value is not valid',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                name: {
+                    message: '权限代码验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '权限代码不能为空'
+                        },
+                        threshold :  2 , //有6字符以上才发送ajax请求，（input中输入一个字符，插件会向服务器发送一次，设置限制，6字符以上才开始）
+                        remote: {//ajax验证。server result:{"valid",true or false} 向服务发送当前input name值，获得一个json数据。例表示正确：{"valid",true}
+                            url: "role/isExist",//验证地址
+                            data:function(validator) {// 获取需要传送到后台的验证的数据
+                                return {
+                                    name:$("#name").val()
+                                }
+                            },
+                            message: '权限代码已存在',//提示消息
+                            delay :  500,//每输入一个字符，就发ajax请求，服务器压力还是太大，设置2秒发送一次ajax（默认输入一个字符，提交一次，服务器压力太大）
+                            type: 'POST'//请求方式
+                        }
+                    }
+                },
+                roleName:{
+                    message: '权限名称验证失败',
+                    validators: {
+                        notEmpty: {
+                            message: '权限名称不能为空'
+                        }
+                    }
+                }
+            }
+        })
+
+        // 绑定dialog的确定按钮的监听事件
+        $("#btnOk",window.top.document).click(function() {
+            var t = $.fn.zTree.getZTreeObj("roleZtree");
+            var nodes = t.getCheckedNodes(true);
+            var treeArray = "";
+            for(var i=0;i<nodes.length;i++){
+                if(i==0){
+                    treeArray = nodes[i].id
+                }else{
+                    treeArray =  treeArray + "," + nodes[i].id
+                }
+            }
+            $("#treeArray").attr("value",treeArray);
+            // 此段是为防止需要点击两次按钮来实现验证的方法，若不添加此处的放行，那么我们将要点击两次确定按钮才可以提交验证
+            var name = $("#name").val();
+            // 判断当前的code又值，且当前不存在错误验证方可放开该字段的验证
+            if(name != null && name != ""&&$("#name").parent("div").find('.glyphicon-remove').length==0){
+                $('#roleForm').bootstrapValidator('enableFieldValidators', 'name', false);
+            } else {
+                $('#roleForm').bootstrapValidator('enableFieldValidators', 'name', true);
+            }
+            var bootstrapValidator = $("#roleForm", window.top.document).data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if(bootstrapValidator.isValid()){
+                $.post(api_url+$("#roleForm",window.top.document).attr('action'),$("#roleForm",window.top.document).serialize(),function(e){
+                    if(e.result){
+                        $('.modal-dialog', window.top.document).parent('div').remove()
+                        $('body', window.top.document).find('.modal-backdrop').remove();
+                        // jquery 调用刷新当前操作的table页面的refresh方法
+                        $(window.parent.document).contents().find(".tab-pane.fade.active.in iframe")[0].contentWindow.doQuery();
+                        window.Ewin.alert({message:'增加数据成功!'});
+                    }else{
+                        window.Ewin.alert({message:'增加数据失败!'});
+                    }
+                })
+            }
+        });
+
+
+        var setting = {
+            check: {
+                enable: true
+            },
+            view: {
+                dblClickExpand: false,
+                showLine: true,
+                selectedMulti: false
+            },
+            data: {
+                simpleData: {
+                    enable:true,
+                    idKey: "id",
+                    pIdKey: "pId",
+                    rootPId: "0"
+                }
+            },
+            callback: {
+                beforeClick: function(treeId, treeNode) {
+                    var zTree = $.fn.zTree.getZTreeObj('roleZtree');
+                    if (treeNode.isParent) {
+                        zTree.expandNode(treeNode);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        };
+
+        $.post(api_url+"tree/loadUserTree",function(info){
+            var t = $("#roleZtree");
+            t = $.fn.zTree.init(t, setting,info.data);
+        })
+    })
+    ]]>
+</script>
+</body>
+</html>
