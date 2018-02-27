@@ -8,3 +8,5 @@
 若有那里缺失的地方，大家可以直接加QQ282245889直接联系我。
 
 该系列的CSDN的文章地址是：http://mp.blog.csdn.net/postedit/79308970
+
+数据库执行脚本大家可以直接github的20180227.sql自行下载下来在数据库创建hyll_springboot数据库，接着再执行数据库脚本
